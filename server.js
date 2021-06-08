@@ -47,6 +47,11 @@ function filterByQuery(query, animalsArray) {
     return filteredResults;
   }
 
+  function findById(id, animalsArray) {
+    const result = animalsArray.filter(animal => animal.id === id)[0];
+    return result;
+  }
+
 //the route
 //the get() method requires 2 arguments. 
   //first a string that describes the route the client will have to fetch from
@@ -56,12 +61,13 @@ function filterByQuery(query, animalsArray) {
 app.get('/api/animals', (req, res) => {
     let results = animals;
     //console.log(req.query)
-  if (req.query) {
-    results = filterByQuery(req.query, results);
-  }
-  //.json() is so we can send lots of JSON. This also changes the headers(i.e, additional metadata that's sent with every request/response) 
-    //so that client knows it's receiving JSON
-  res.json(results);
+    //req.query is multifaceted, often combing multiple parameters
+    if (req.query) {
+        results = filterByQuery(req.query, results);
+    }
+    //.json() is so we can send lots of JSON. This also changes the headers(i.e, additional metadata that's sent with every request/response) 
+        //so that client knows it's receiving JSON
+    res.json(results);
 });
     //use the send() method to send the string Hello! to our client
     //res.send('Hello!');
@@ -71,6 +77,16 @@ app.get('/api/animals', (req, res) => {
 // app.listen(3001, () => {
 //     console.log(`API server now on port 3001!`);
 //   });
+
+app.get('/api/animals/:id', (req, res) => {
+    //req.param is specific to a single property often intended to retrieve a single record
+    const result = findById(req.params.id, animals);
+    if (result) {
+      res.json(result);
+    } else {
+        res.send(404);
+      }  
+  });
 
 app.listen(PORT, () => {
     console.log(`API server now on port ${PORT}!`);
