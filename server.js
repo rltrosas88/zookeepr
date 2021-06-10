@@ -88,6 +88,16 @@ app.get('/api/animals/:id', (req, res) => {
       }  
   });
 
+//post method is another method of the app object that allows us to create routes
+  //they represent the action of a client requesting the server to accept data rather than the other way around
+app.post('/api/animals', (req, res) => {
+  // req.body is where our incoming content will be
+  //using console.log to view the data we're posting to the server
+  console.log(req.body);
+  //using res.json to send the data back to the client
+  res.json(req.body);
+});
+
 app.listen(PORT, () => {
     console.log(`API server now on port ${PORT}!`);
   });
