@@ -15,6 +15,8 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 // parse incoming JSON data
 app.use(express.json());
+//express.static method provided a file path to a location in our application
+app.use(express.static('public'));
 
 //a function to handle different kinds of queries
 function filterByQuery(query, animalsArray) {
@@ -151,6 +153,10 @@ app.post('/api/animals', (req, res) => {
   //res.json(req.body);
   res.json(animal);
   }
+});
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/index.html'));
 });
 
 app.listen(PORT, () => {
