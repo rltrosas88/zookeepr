@@ -98,6 +98,15 @@ app.post('/api/animals', (req, res) => {
   res.json(req.body);
 });
 
+//middleware functions can serve many purposes but ultimately they allow us to keep our route endpoint callback functions more readable 
+  //while letting us reuse functionality across routes to keep our code DRY
+// parse incoming string or array data
+  //express.urlencoded({ extend: true }) method is a built in Epress.js method
+    //it takes incoming POST data and converts it to key/value pairings that can be accessed in the req.body object
+app.use(express.urlencoded({ extended: true }));
+// parse incoming JSON data
+app.use(express.json());
+
 app.listen(PORT, () => {
     console.log(`API server now on port ${PORT}!`);
   });
