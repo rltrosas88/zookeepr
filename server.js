@@ -1,11 +1,20 @@
+const fs = require('fs');
+//module built in the Node.js API that provides utilities for working with file and directory paths
+  //it makes working with our file system more predictable
+const path = require('path');
+const express = require('express');
 //require the data
 const { animals } = require('./data/animals');
-
-const express = require('express');
-
 const PORT = process.env.PORT || 3001;
-
 const app = express();
+//middleware functions can serve many purposes but ultimately they allow us to keep our route endpoint callback functions more readable 
+  //while letting us reuse functionality across routes to keep our code DRY
+// parse incoming string or array data
+  //express.urlencoded({ extend: true }) method is a built in Epress.js method
+    //it takes incoming POST data and converts it to key/value pairings that can be accessed in the req.body object
+app.use(express.urlencoded({ extended: true }));
+// parse incoming JSON data
+app.use(express.json());
 
 //a function to handle different kinds of queries
 function filterByQuery(query, animalsArray) {
@@ -52,6 +61,41 @@ function filterByQuery(query, animalsArray) {
     return result;
   }
 
+  function createNewAnimal(body, animalsArray) {
+    //console.log(body);
+    // our function's main code will go here!
+    const animal = body;
+    animalsArray.push(animal);
+    //writeFileSync is a synchronous version of writeFile and doesn't require a callback function
+    fs.writeFileSync(
+      path.join(__dirname, './data/animals.json'),
+      //JSON.stringify converts the JavaScript array data as JSON
+      //null and 2 are means of keeping our data formatted
+      //null argument means we don't want to edit any of our existing data
+      //2 indicates we want to create white space between our values to make it mor readable
+      JSON.stringify({ animals: animalsArray }, null, 2)
+    );
+    // return finished code to post route for response
+    return animal;
+    //return body;
+  }
+
+  function validateAnimal(animal) {
+    if (!animal.name || typeof animal.name !== 'string') {
+      return false;
+    }
+    if (!animal.species || typeof animal.species !== 'string') {
+      return false;
+    }
+    if (!animal.diet || typeof animal.diet !== 'string') {
+      return false;
+    }
+    if (!animal.personalityTraits || !Array.isArray(animal.personalityTraits)) {
+      return false;
+    }
+    return true;
+  }
+
 //the route
 //the get() method requires 2 arguments. 
   //first a string that describes the route the client will have to fetch from
@@ -91,21 +135,23 @@ app.get('/api/animals/:id', (req, res) => {
 //post method is another method of the app object that allows us to create routes
   //they represent the action of a client requesting the server to accept data rather than the other way around
 app.post('/api/animals', (req, res) => {
+  // set id based on what the next index of the array will be
+  req.body.id = animals.length.toString();
   // req.body is where our incoming content will be
   //using console.log to view the data we're posting to the server
-  console.log(req.body);
-  //using res.json to send the data back to the client
-  res.json(req.body);
-});
+  //console.log(req.body);
 
-//middleware functions can serve many purposes but ultimately they allow us to keep our route endpoint callback functions more readable 
-  //while letting us reuse functionality across routes to keep our code DRY
-// parse incoming string or array data
-  //express.urlencoded({ extend: true }) method is a built in Epress.js method
-    //it takes incoming POST data and converts it to key/value pairings that can be accessed in the req.body object
-app.use(express.urlencoded({ extended: true }));
-// parse incoming JSON data
-app.use(express.json());
+  // if any data in req.body is incorrect, send 400 error back
+  if (!validateAnimal(req.body)) {
+    res.status(400).send('The animal is not properly formatted.');
+  } else {
+  // add animal to json file and animals array in this function
+    const animal = createNewAnimal(req.body, animals);
+  //using res.json to send the data back to the client
+  //res.json(req.body);
+  res.json(animal);
+  }
+});
 
 app.listen(PORT, () => {
     console.log(`API server now on port ${PORT}!`);
