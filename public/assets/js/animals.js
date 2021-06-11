@@ -25,11 +25,29 @@ const printResults = resultArr => {
 const getAnimals = (formData = {}) => {
   let queryUrl = '/api/animals?';
 
+  //if nothing is passed into formData, then the request will be simply GET /api/animals
   Object.entries(formData).forEach(([key, value]) => {
     queryUrl += `${key}=${value}&`;
   });
 
-  console.log(queryUrl);
+  //console.log(queryUrl);
+
+  fetch(queryUrl)
+  //check to see if the ok property in the response is true or false
+  .then(response => {
+    //if there's an error send an alert to the user
+    if (!response.ok) {
+      return alert('Error: ' + response.statusText);
+    }
+    //if everything's okay use .json() method to parse our response into readable JSON format
+    return response.json();
+  })
+  //then send the array of animal data to the printResults function
+  .then(animalData => {
+    console.log(animalData);
+    
+    printResults(animalData);
+  });
 
 };
 
